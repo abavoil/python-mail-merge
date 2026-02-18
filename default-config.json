@@ -5,7 +5,9 @@
     "password": "",
     "csv_file": "data.csv",
     "template_file": "template.html",
-    "email_subject": "",
     "email_column": "email",
+    "email_subject": "Hi <<Firstname>>",
+    "cc": [],
+    "bcc": [],
     "constants": {}
 }

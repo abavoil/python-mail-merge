@@ -1,5 +1,15 @@
-.DS_Store
+# Ignore all job folders by default
+# jobs/**/*
 
+# Except for the example job
+# !jobs/example/
+
+# Always ignore preview folders (even in the example job)
+**/previews/
+
+# Ignore local configuration overrides
 config.json
-data.csv
-template.html
+
+# Ignore credentials and system files
+__pycache__/
+.DS_Store

@@ -1,102 +1,122 @@
 # Python Mail Merger
 
-Ce script permet d'envoyer des emails personnalisés en masse à partir d'un fichier **CSV** et d'un template **HTML**. Il supporte l'injection de données variables (colonnes du CSV) et de données constantes (liens, noms d'établissement, etc.) définies dans un fichier de configuration.
-
-## 🚀 Fonctionnement
-
-Le script effectue une fusion (merge) entre trois éléments :
-1. **Un template HTML** : Contient le design et des balises du type `<<NomDuChamp>>`.
-2. **Un fichier CSV** : Contient les données qui varient pour chaque destinataire (une ligne = un email).
-3. **Un fichier JSON de configuration** : Gère les accès SMTP et les données constantes communes à tous les emails.
-
-Le script utilise la méthode `.replace()` pour l'injection des données, ce qui permet d'utiliser des balises `<style>` complexes dans votre HTML sans conflit avec la syntaxe Python.
+A lightweight mail merge tool using Python, SMTP for batch filling HTML template from CSV data and sending it by mail.
+Here is the completely updated **README.md** reflecting the new `jobs/` folder structure, the CLI arguments, and the new configuration features.
 
 ---
 
-## 📁 Structure des fichiers
+# Python Mail Merge
 
-- `main.py` : Le script d'exécution.
-- `default-config.json` : Configuration par défaut.
-- `config.json` : Configuration locale (exclue du versioning, contient vos mots de passe).
-- `template.html` : Le corps de l'email.
-- `data.csv` : La base de données.
+A lightweight tool to send bulk HTML emails using Python and SMTP from a template and CSV data.
+
+## ✨ Features
+
+*   **📂 Job-Based Organization**: Keep different campaigns (exams, newsletters, announcements) in separate folders under `jobs/`.
+*   **Safe Preview Mode**: Generate HTML files locally to check layouts and placeholders before sending a single email.
+*   **Anti-Spam Compliance**: Automatically generates a `text/plain` version alongside the HTML to improve deliverability.
+*   **Advanced Config**: Supports global settings with local overrides, including **CC** and **BCC** support.
+*   **Secure**: Designed to work with App Passwords (Gmail) and standard SMTP servers.
 
 ---
 
-## 📖 Exemple Simplissime
+## 📂 Project Structure
 
-Voici comment configurer un envoi rapide :
-
-### 1. Le Template (`template.html`)
-```html
-<style>
-    .card { font-family: sans-serif; border: 1px solid #ddd; padding: 20px; }
-    .highlight { color: #27ae60; font-weight: bold; }
-</style>
-
-<div class="card">
-    <p>Bonjour <<prenom>>,</p>
-    <p>Tu as obtenu la note de <span class="highlight"><<note>>/20</span>.</p>
-    <p>Merci de ta participation à <strong><<nom_ecole>></strong>.</p>
-</div>
+```text
+python-mail-merge/
+├── main.py                  # The execution script
+├── default-config.json      # Global SMTP & default settings
+├── jobs/                    # Folder containing your mailing campaigns
+│   ├── math_exam/           # Example Job
+│   │   ├── config.json      # Local overrides (subject, specific links)
+│   │   ├── data.csv         # Recipient list and variables
+│   │   └── template.html    # HTML Email design
+│   └── newsletter_nov/
+│       └── ...
+└── README.md
 ```
 
-### 2. Les Données (`data.csv`)
-```csv
-prenom,email,note
-Alice,alice@example.com,18
-Bob,bob@example.com,14
-```
+---
 
-### 3. La Configuration (`config.json`)
+## ⚙️ Configuration
+
+### 1. Global Configuration (`default-config.json`)
+Located at the root. Set your SMTP credentials and defaults here.
+
 ```json
 {
-    "sender_email": "votre.email@gmail.com",
-    "password": "votre-mot-de-passe-application",
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 465,
+    "sender_email": "your.name@gmail.com",
+    "password": "your-app-password-here",
+    "csv_file": "data.csv",
+    "template_file": "template.html",
     "email_column": "email",
-    "email_subject": "Résultat de <<prenom>>",
+    "email_subject": "Update for <<Firstname>>",
+    "cc": [],
+    "bcc": [],
+    "constants": {}
+}
+```
+
+### 2. Job Configuration (`jobs/math_exam/config.json`)
+Located inside a job folder. Any value here overrides the global default.
+
+```json
+{
+    "email_subject": "Math Results - <<Prenom>> <<Nom>>",
+    "cc": ["admin@school.com"],
     "constants": {
-        "nom_ecole": "Lycée Saint-Exupéry"
+        "school_name": "University of Science",
+        "link_correction": "https://1drv.ms/u/..."
     }
 }
 ```
 
 ---
 
-## ⚙️ Configuration Avancée
+## 🚀 Usage
 
-### Gestion des fichiers JSON
-Le script fusionne `default-config.json` et `config.json`. Cela permet de :
-- Garder les paramètres génériques dans le fichier par défaut.
-- Surcharger uniquement les informations sensibles (mot de passe, emails) dans le fichier local.
+The script is run via the command line. You must specify the folder of the job you want to process.
 
-### Sécurité SMTP (Gmail)
-Si vous utilisez Gmail, vous ne pouvez pas utiliser votre mot de passe habituel. Vous devez :
-1. Activer la validation en deux étapes sur votre compte Google.
-2. Générer un **Mot de passe d'application** (Sécurité > Connexion à Google).
-3. Utiliser ce code de 16 caractères dans votre fichier `config.json`.
+### 1. Dry Run / Preview (Recommended)
+Before sending, generate the emails locally to verify variables and layout.
 
-### Balises de remplacement
-Les balises dans le HTML et dans l'objet de l'email doivent être entourées de `<< >>`.
-- Si le script trouve `<<nom>>`, il cherchera d'abord une colonne `nom` dans le CSV.
-- S'il ne la trouve pas, il cherchera une clé `nom` dans le dictionnaire `constants` du fichier JSON.
+```bash
+python main.py jobs/math_exam --preview
+```
+*   **Output:** Creates a `previews/` folder inside `jobs/math_exam/`.
+*   **Action:** Open the generated HTML files in your browser to inspect them.
 
----
+### 2. Send Emails
+Once you are satisfied with the preview, remove the flag to send them for real.
 
-## 🛠 Installation et Exécution
-
-1. Assurez-vous d'avoir Python 3 installé.
-2. Placez vos fichiers dans le même dossier.
-3. Exécutez le script :
-   ```bash
-   python main.py
-   ```
+```bash
+python main.py jobs/math_exam
+```
 
 ---
 
-## ⚠️ Points d'attention importants
+## 🛠️ Setup & Best Practices
 
-- **Limite d'envoi** : Les serveurs SMTP (comme Gmail ou Outlook) ont des quotas quotidiens d'envoi d'emails (généralement entre 500 et 2000 par jour).
-- **Encodage** : Enregistrez toujours votre fichier CSV en **UTF-8** pour éviter les problèmes d'accents.
-- **Headers CSV** : Les noms des colonnes dans votre CSV ne doivent pas contenir d'espaces ou de caractères spéciaux complexes pour faciliter le remplacement.
-- **Testez d'abord** : Avant d'envoyer à 200 personnes, créez un fichier CSV de test avec uniquement votre propre adresse email.
+### 1. Gmail Security & App Passwords
+If using Gmail, your standard login password **will not work**.
+1. Go to your Google Account > **Security**.
+2. Enable **2-Step Verification**.
+3. Go to **2-Step Verification** > **App Passwords**.
+4. Create a new app (name it "MailMerge") and use the generated 16-character code as the `"password"` in your JSON.
+
+### 2. Placeholder Syntax
+In your **HTML Template** and **Email Subject**, use `<<ColumnName>>`.
+*   The script looks for `ColumnName` in your **CSV**.
+*   If not found, it looks in the `"constants"` dictionary in your **JSON**.
+
+### 3. CSV Encoding
+Always save your CSV files in **UTF-8** encoding. This ensures that names with accents (é, è, ç) or special characters are displayed correctly.
+
+### 4. Rate Limits
+Be aware of your email provider's daily limits (e.g., Gmail Personal is ~500 emails/day). Exceeding this may temporarily block your account.
+
+---
+
+## ⚖️ License
+This project is released under the **MIT License**. Feel free to use and modify it for your personal or professional needs.
