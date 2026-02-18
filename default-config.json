@@ -1,0 +1,11 @@
+{
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 465,
+    "sender_email": "",
+    "password": "",
+    "csv_file": "data.csv",
+    "template_file": "template.html",
+    "email_subject": "",
+    "email_column": "email",
+    "constants": {}
+}
