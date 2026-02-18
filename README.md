@@ -1,13 +1,6 @@
-# Python Mail Merger
-
-A lightweight mail merge tool using Python, SMTP for batch filling HTML template from CSV data and sending it by mail.
-Here is the completely updated **README.md** reflecting the new `jobs/` folder structure, the CLI arguments, and the new configuration features.
-
----
-
 # Python Mail Merge
 
-A lightweight tool to send bulk HTML emails using Python and SMTP from a template and CSV data.
+A lightweight mail merge tool using Python, SMTP for batch filling HTML template from CSV data and sending it by mail.
 
 ## ✨ Features
 
